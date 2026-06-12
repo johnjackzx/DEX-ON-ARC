@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARC DEX — Stablecoin Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --arc-blue: #4D8EE9;
+    --arc-blue-dim: #2A5FAA;
+    --arc-bg: #080D1A;
+    --arc-surface: #0D1527;
+    --arc-surface2: #111D34;
+    --arc-border: rgba(77,142,233,0.15);
+    --arc-border-strong: rgba(77,142,233,0.3);
+    --arc-text: #E8EDF7;
+    --arc-muted: #7A8AAD;
+    --arc-dim: #3A4A6A;
+    --arc-green: #1D9E75;
+    --arc-green-light: #5DCAA5;
+    --arc-amber: #EF9F27;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--arc-bg);
+    color: var(--arc-text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(8,13,26,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--arc-border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 500; color: var(--arc-text);
+    text-decoration: none; letter-spacing: -0.3px;
+  }
+  .nav-logo-icon {
+    width: 32px; height: 32px;
+    background: var(--arc-blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 2rem; list-style: none;
+  }
+  .nav-links a {
+    color: var(--arc-muted); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--arc-text); }
+  .nav-cta {
+    background: var(--arc-blue);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: var(--font-body);
+    transition: opacity 0.15s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    padding: 120px 2rem 80px;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 420px;
+    gap: 80px; align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(77,142,233,0.1);
+    border: 1px solid var(--arc-border-strong);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px; font-weight: 500; color: var(--arc-blue);
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  .eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--arc-green-light);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 58px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    color: var(--arc-text);
+    margin-bottom: 20px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--arc-blue);
+  }
+  .hero-sub {
+    font-size: 17px; color: var(--arc-muted);
+    line-height: 1.7; max-width: 480px;
+    margin-bottom: 36px;
+  }
+  .hero-actions {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--arc-blue); color: #fff;
+    border: none; border-radius: 10px;
+    padding: 13px 26px; font-size: 15px; font-weight: 500;
+    cursor: pointer; font-family: var(--font-body);
+    transition: opacity 0.15s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
+    background: transparent; color: var(--arc-text);
+    border: 1px solid var(--arc-border-strong);
+    border-radius: 10px;
+    padding: 12px 26px; font-size: 15px; font-weight: 500;
+    cursor: pointer; font-family: var(--font-body);
+    transition: border-color 0.15s, background 0.15s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-ghost:hover { background: rgba(77,142,233,0.07); border-color: var(--arc-blue); }
+
+  .hero-badges {
+    display: flex; gap: 16px; align-items: center; margin-top: 28px; flex-wrap: wrap;
+  }
+  .badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--arc-muted);
+    font-family: var(--font-mono);
+  }
+  .badge-check {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: rgba(29,158,117,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .badge-check svg { display: block; }
+
+  /* SWAP CARD */
+  .swap-card {
+    background: var(--arc-surface);
+    border: 1px solid var(--arc-border);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .swap-card::before {
+    content: '';
+    position: absolute; top: -1px; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--arc-blue), transparent);
+  }
+  .swap-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .swap-title { font-size: 15px; font-weight: 500; color: var(--arc-text); }
+  .swap-settings {
+    background: none; border: none; color: var(--arc-muted);
+    cursor: pointer; padding: 4px;
+    display: flex; align-items: center;
+  }
+  .swap-settings:hover { color: var(--arc-text); }
+
+  .token-box {
+    background: var(--arc-surface2);
+    border: 1px solid var(--arc-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .token-box-label {
+    font-size: 12px; color: var(--arc-muted);
+    font-family: var(--font-mono); margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .token-row {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .token-amount {
+    font-family: var(--font-mono);
+    font-size: 28px; font-weight: 500;
+    color: var(--arc-text);
+    background: none; border: none; outline: none;
+    width: 160px;
+    caret-color: var(--arc-blue);
+  }
+  .token-amount::placeholder { color: var(--arc-dim); }
+  .token-select {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(77,142,233,0.1);
+    border: 1px solid var(--arc-border-strong);
+    border-radius: 100px; padding: 7px 12px 7px 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .token-select:hover { background: rgba(77,142,233,0.18); }
+  .token-icon {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .token-icon.usdc { background: #2775CA; color: #fff; }
+  .token-icon.eurc { background: #3B65D2; color: #fff; }
+  .token-icon.usyc { background: #1D9E75; color: #fff; }
+  .token-name { font-size: 14px; font-weight: 500; color: var(--arc-text); }
+  .token-caret { color: var(--arc-muted); }
+  .token-usd {
+    font-size: 12px; color: var(--arc-muted);
+    font-family: var(--font-mono);
+    margin-top: 8px;
+  }
+  .token-balance {
+    font-size: 12px; color: var(--arc-muted);
+    font-family: var(--font-mono);
+    margin-top: 8px; text-align: right;
+  }
+
+  .swap-middle {
+    display: flex; justify-content: center; margin: 12px 0;
+  }
+  .swap-arrow-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--arc-surface2);
+    border: 1px solid var(--arc-border-strong);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--arc-blue);
+    transition: background 0.15s;
+  }
+  .swap-arrow-btn:hover { background: rgba(77,142,233,0.12); }
+
+  .swap-info {
+    background: rgba(77,142,233,0.05);
+    border: 1px solid var(--arc-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 16px 0;
+  }
+  .swap-info-row {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--arc-muted);
+    font-family: var(--font-mono); padding: 3px 0;
+  }
+  .swap-info-row span:last-child { color: var(--arc-text); }
+
+  .swap-btn {
+    width: 100%; padding: 16px;
+    background: var(--arc-blue); color: #fff;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 500;
+    cursor: pointer; font-family: var(--font-body);
+    transition: opacity 0.15s;
+    margin-top: 4px;
+  }
+  .swap-btn:hover { opacity: 0.88; }
+
+  /* STATS BAR */
+  .stats-bar {
+    border-top: 1px solid var(--arc-border);
+    border-bottom: 1px solid var(--arc-border);
+    padding: 16px 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .stats-track {
+    display: flex; gap: 60px;
+    animation: marquee 30s linear infinite;
+    width: max-content;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .stats-item {
+    display: flex; align-items: center; gap: 10px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .stats-label { font-size: 12px; color: var(--arc-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stats-value { font-size: 14px; font-weight: 500; color: var(--arc-text); font-family: var(--font-mono); }
+  .stats-change.up { color: var(--arc-green-light); font-size: 12px; font-family: var(--font-mono); }
+  .stats-change.down { color: #E24B4A; font-size: 12px; font-family: var(--font-mono); }
+  .stats-sep { color: var(--arc-dim); }
+
+  /* FEATURES */
+  .section { max-width: 1200px; margin: 0 auto; padding: 80px 2rem; }
+  .section-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--arc-blue); margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-size: clamp(28px, 4vw, 42px);
+    font-weight: 300; letter-spacing: -1px; color: var(--arc-text);
+    margin-bottom: 16px;
+  }
+  .section-sub { font-size: 16px; color: var(--arc-muted); max-width: 520px; line-height: 1.7; }
+
+  .features-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-top: 48px;
+  }
+  .feature-card {
+    background: var(--arc-surface);
+    border: 1px solid var(--arc-border);
+    border-radius: 16px; padding: 28px;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: var(--arc-border-strong); }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(77,142,233,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .feature-title {
+    font-family: var(--font-display); font-size: 17px;
+    font-weight: 500; color: var(--arc-text); margin-bottom: 8px;
+  }
+  .feature-body { font-size: 14px; color: var(--arc-muted); line-height: 1.65; }
+
+  /* TOKEN TABLE */
+  .token-table-wrap {
+    margin-top: 40px;
+    background: var(--arc-surface);
+    border: 1px solid var(--arc-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .token-table-header {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--arc-border);
+    font-size: 12px; color: var(--arc-muted);
+    font-family: var(--font-mono); text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .token-table-row {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--arc-border);
+    align-items: center;
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .token-table-row:last-child { border-bottom: none; }
+  .token-table-row:hover { background: rgba(77,142,233,0.04); }
+  .tt-name-cell { display: flex; align-items: center; gap: 12px; }
+  .tt-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; font-family: var(--font-mono); flex-shrink: 0; }
+  .tt-name { font-weight: 500; color: var(--arc-text); font-size: 15px; }
+  .tt-symbol { font-size: 12px; color: var(--arc-muted); font-family: var(--font-mono); }
+  .tt-price { font-family: var(--font-mono); font-size: 15px; color: var(--arc-text); }
+  .tt-change { font-family: var(--font-mono); font-size: 13px; }
+  .tt-change.up { color: var(--arc-green-light); }
+  .tt-change.down { color: #E24B4A; }
+  .tt-vol { font-family: var(--font-mono); font-size: 13px; color: var(--arc-muted); }
+  .tt-mcap { font-family: var(--font-mono); font-size: 13px; color: var(--arc-muted); }
+  .tt-spark { display: flex; align-items: center; }
+
+  /* NETWORK INFO */
+  .network-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 40px;
+  }
+  .network-card {
+    background: var(--arc-surface);
+    border: 1px solid var(--arc-border);
+    border-radius: 14px; padding: 24px;
+  }
+  .network-val {
+    font-family: var(--font-mono); font-size: 26px; font-weight: 500;
+    color: var(--arc-blue); margin-bottom: 4px;
+  }
+  .network-label { font-size: 13px; color: var(--arc-muted); }
+
+  /* HOW IT WORKS */
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 56px; position: relative;
+  }
+  .steps-grid::before {
+    content: '';
+    position: absolute; top: 28px; left: 120px; right: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--arc-border), var(--arc-border-strong), var(--arc-border));
+    pointer-events: none;
+  }
+  .step { text-align: center; }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--arc-surface); border: 1px solid var(--arc-border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 18px; font-weight: 500;
+    color: var(--arc-blue); margin: 0 auto 20px;
+    position: relative; z-index: 1;
+  }
+  .step-title { font-family: var(--font-display); font-size: 17px; font-weight: 500; color: var(--arc-text); margin-bottom: 10px; }
+  .step-body { font-size: 14px; color: var(--arc-muted); line-height: 1.65; }
+
+  /* CONTRACTS */
+  .contracts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 36px; }
+  .contract-item {
+    background: var(--arc-surface);
+    border: 1px solid var(--arc-border);
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+  }
+  .contract-name { font-size: 13px; font-weight: 500; color: var(--arc-text); margin-bottom: 2px; }
+  .contract-addr { font-family: var(--font-mono); font-size: 11px; color: var(--arc-muted); word-break: break-all; }
+  .contract-copy {
+    background: none; border: 1px solid var(--arc-border);
+    border-radius: 6px; color: var(--arc-muted);
+    cursor: pointer; padding: 6px 8px; font-size: 11px;
+    font-family: var(--font-mono); white-space: nowrap;
+    flex-shrink: 0; transition: color 0.15s, border-color 0.15s;
+  }
+  .contract-copy:hover { color: var(--arc-text); border-color: var(--arc-border-strong); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--arc-border);
+    padding: 40px 2rem; margin-top: 40px;
+    max-width: 1200px; margin-left: auto; margin-right: auto;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-left {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display); font-size: 16px;
+    font-weight: 400; color: var(--arc-muted);
+  }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a {
+    font-size: 13px; color: var(--arc-muted); text-decoration: none;
+    transition: color 0.15s;
+  }
+  .footer-links a:hover { color: var(--arc-text); }
+
+  /* SPARKLINE */
+  .spark-line { stroke-width: 1.5; fill: none; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding-top: 100px; }
+    .swap-card { max-width: 420px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .network-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-grid { grid-template-columns: 1fr; gap: 24px; }
+    .steps-grid::before { display: none; }
+    .contracts-grid { grid-template-columns: 1fr; }
+    .token-table-header, .token-table-row { grid-template-columns: 2fr 1fr 1fr; }
+    .tt-vol, .tt-mcap { display: none; }
+    nav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    ARC DEX
+  </a>
+  <ul class="nav-links">
+    <li><a href="#swap">Swap</a></li>
+    <li><a href="#tokens">Markets</a></li>
+    <li><a href="#network">Network</a></li>
+    <li><a href="#contracts">Contracts</a></li>
+    <li><a href="https://docs.arc.io" target="_blank">Docs ↗</a></li>
+  </ul>
+  <button class="nav-cta" onclick="alert('Connect wallet feature — integrate with EIP-6963 wallet detection')">Connect wallet</button>
+</nav>
+
+<!-- STATS BAR -->
+<div class="stats-bar" style="margin-top:64px;">
+  <div class="stats-track" id="statsTrack">
+    <div class="stats-item"><span class="stats-label">USDC/EURC</span><span class="stats-value">1.0823</span><span class="stats-change up">+0.12%</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Chain ID</span><span class="stats-value">5042002</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Gas (USDC)</span><span class="stats-value">~$0.0004</span><span class="stats-change up">low</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Finality</span><span class="stats-value">&lt;1s</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Network</span><span class="stats-value">Arc Testnet</span><span class="eyebrow-dot" style="display:inline-block;margin-left:4px;"></span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">24h Volume</span><span class="stats-value">$4.2M</span><span class="stats-change up">+18%</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">USDC/USYC</span><span class="stats-value">0.9997</span><span class="stats-change down">-0.02%</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="stats-item"><span class="stats-label">USDC/EURC</span><span class="stats-value">1.0823</span><span class="stats-change up">+0.12%</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Chain ID</span><span class="stats-value">5042002</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Gas (USDC)</span><span class="stats-value">~$0.0004</span><span class="stats-change up">low</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Finality</span><span class="stats-value">&lt;1s</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">Network</span><span class="stats-value">Arc Testnet</span><span class="eyebrow-dot" style="display:inline-block;margin-left:4px;"></span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">24h Volume</span><span class="stats-value">$4.2M</span><span class="stats-change up">+18%</span></div>
+    <div class="stats-item"><span class="stats-sep">·</span></div>
+    <div class="stats-item"><span class="stats-label">USDC/USYC</span><span class="stats-value">0.9997</span><span class="stats-change down">-0.02%</span></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="swap">
+  <div class="hero-left">
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Arc Testnet · EVM Native
+    </div>
+    <h1>Swap stablecoins at <em>onchain speed</em></h1>
+    <p class="hero-sub">The first DEX built on Arc — a Layer-1 blockchain where USDC is the native gas token. Sub-second finality, zero slippage on stable pairs, and deterministic settlement.</p>
+    <div class="hero-actions">
+      <a href="#swap" class="btn-primary">Start swapping</a>
+      <a href="https://docs.arc.io/build/stablecoin-fx" target="_blank" class="btn-ghost">Read the docs ↗</a>
+    </div>
+    <div class="hero-badges">
+      <div class="badge">
+        <div class="badge-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        EVM compatible
+      </div>
+      <div class="badge">
+        <div class="badge-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        USDC gas token
+      </div>
+      <div class="badge">
+        <div class="badge-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        &lt;1s finality
+      </div>
+      <div class="badge">
+        <div class="badge-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        Circle-native
+      </div>
+    </div>
+  </div>
+
+  <!-- SWAP WIDGET -->
+  <div class="swap-card">
+    <div class="swap-header">
+      <span class="swap-title">Swap</span>
+      <button class="swap-settings" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- FROM -->
+    <div class="token-box">
+      <div class="token-box-label">You pay</div>
+      <div class="token-row">
+        <input class="token-amount" type="number" placeholder="0.00" id="fromAmt" oninput="calcSwap()">
+        <div class="token-select" onclick="toggleToken()">
+          <div class="token-icon usdc" id="fromIcon">$</div>
+          <span class="token-name" id="fromName">USDC</span>
+          <span class="token-caret">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <div class="token-usd" id="fromUsd">≈ $0.00</div>
+        <div class="token-balance">Balance: 1,240.00</div>
+      </div>
+    </div>
+
+    <div class="swap-middle">
+      <button class="swap-arrow-btn" onclick="flipTokens()" title="Flip tokens">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- TO -->
+    <div class="token-box">
+      <div class="token-box-label">You receive</div>
+      <div class="token-row">
+        <input class="token-amount" type="number" placeholder="0.00" id="toAmt" readonly style="opacity:0.6;cursor:default;">
+        <div class="token-select" onclick="toggleToToken()">
+          <div class="token-icon eurc" id="toIcon">€</div>
+          <span class="token-name" id="toName">EURC</span>
+          <span class="token-caret">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <div class="token-usd" id="toUsd">≈ $0.00</div>
+        <div class="token-balance">Balance: 0.00</div>
+      </div>
+    </div>
+
+    <!-- RATE INFO -->
+    <div class="swap-info">
+      <div class="swap-info-row"><span>Rate</span><span id="rateDisplay">1 USDC = 0.9237 EURC</span></div>
+      <div class="swap-info-row"><span>Fee (0.04%)</span><span id="feeDisplay">$0.00</span></div>
+      <div class="swap-info-row"><span>Gas (USDC)</span><span>~$0.0004</span></div>
+      <div class="swap-info-row"><span>Slippage</span><span>0.01%</span></div>
+    </div>
+
+    <button class="swap-btn" onclick="handleSwap()">Connect wallet to swap</button>
+  </div>
+</section>
+
+<!-- TOKEN MARKETS -->
+<div style="background: var(--arc-surface); border-top: 1px solid var(--arc-border); border-bottom: 1px solid var(--arc-border);">
+  <section class="section" id="tokens">
+    <div class="section-eyebrow">Markets</div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h2 class="section-title">Stablecoin markets</h2>
+        <p class="section-sub">All tokens natively supported on Arc. USDC is the gas token — every transaction settles in stablecoins.</p>
+      </div>
+    </div>
+    <div class="token-table-wrap">
+      <div class="token-table-header">
+        <span>Token</span>
+        <span>Price</span>
+        <span>24h change</span>
+        <span>24h volume</span>
+        <span>Market cap</span>
+      </div>
+      <div class="token-table-row">
+        <div class="tt-name-cell">
+          <div class="tt-icon usdc">$</div>
+          <div><div class="tt-name">USD Coin</div><div class="tt-symbol">USDC · Native gas</div></div>
+        </div>
+        <div class="tt-price">$1.0000</div>
+        <div class="tt-change up">+0.00%</div>
+        <div class="tt-vol">$2.8M</div>
+        <div class="tt-mcap">$58.4B</div>
+      </div>
+      <div class="token-table-row">
+        <div class="tt-name-cell">
+          <div class="tt-icon eurc">€</div>
+          <div><div class="tt-name">Euro Coin</div><div class="tt-symbol">EURC · ERC-20</div></div>
+        </div>
+        <div class="tt-price">$1.0824</div>
+        <div class="tt-change up">+0.12%</div>
+        <div class="tt-vol">$1.1M</div>
+        <div class="tt-mcap">$1.2B</div>
+      </div>
+      <div class="token-table-row">
+        <div class="tt-name-cell">
+          <div class="tt-icon usyc">Y</div>
+          <div><div class="tt-name">US Yield Coin</div><div class="tt-symbol">USYC · ERC-20</div></div>
+        </div>
+        <div class="tt-price">$0.9997</div>
+        <div class="tt-change down">-0.02%</div>
+        <div class="tt-vol">$340K</div>
+        <div class="tt-mcap">$420M</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="section-eyebrow">Why Arc DEX</div>
+  <h2 class="section-title">Built for programmable money</h2>
+  <p class="section-sub">Arc's architecture removes the compromises of legacy DEXs. USDC as the gas token means no ETH needed, ever.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="feature-title">Sub-second finality</div>
+      <div class="feature-body">Transactions are irreversibly final in under one second. No waiting for multiple confirmations — your swap settles before you close the tab.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div class="feature-title">Stable, predictable fees</div>
+      <div class="feature-body">Gas is priced in USDC. Fees never spike during high-activity periods — you pay cents regardless of market conditions or network load.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="feature-title">Opt-in privacy</div>
+      <div class="feature-body">Confidential transactions with selective disclosure. Choose what to reveal on a per-transaction basis — compliance-ready from the start.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+      </div>
+      <div class="feature-title">Stablecoin FX engine</div>
+      <div class="feature-body">Powered by StableFX — real-time RFQ execution with onchain settlement. Institutional-grade FX for USDC, EURC, and yield-bearing assets.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/></svg>
+      </div>
+      <div class="feature-title">Crosschain bridging</div>
+      <div class="feature-body">CCTP-native bridge and Unified Balance via App Kit. Move USDC across Ethereum, Solana, and 20+ EVM chains — one click, one balance.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4D8EE9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+      </div>
+      <div class="feature-title">AI agent ready</div>
+      <div class="feature-body">ERC-8004 onchain identity for agents. Autonomous AI can hold wallets, place swaps, and settle value — Arc is built for the agentic economy.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div style="background: var(--arc-surface); border-top: 1px solid var(--arc-border); border-bottom: 1px solid var(--arc-border);">
+  <section class="section">
+    <div class="section-eyebrow">How it works</div>
+    <h2 class="section-title">Three steps to swap</h2>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Connect your wallet</div>
+        <div class="step-body">Add Arc Testnet (Chain ID: 5042002, RPC: rpc.testnet.arc.network) to MetaMask, Rabby, or any EVM wallet. Get testnet USDC from the Circle Faucet.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Choose your pair</div>
+        <div class="step-body">Select from USDC, EURC, and USYC. Enter the amount you want to send. The rate is calculated on-chain using StableFX RFQ — no AMM slippage on stable pairs.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Confirm and settle</div>
+        <div class="step-body">One signature. Finality in under one second. USDC gas fees are typically fractions of a cent. Your tokens arrive before you can refresh the page.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- NETWORK STATS -->
+<section class="section" id="network">
+  <div class="section-eyebrow">Network</div>
+  <h2 class="section-title">Arc Testnet at a glance</h2>
+  <p class="section-sub">All the configuration you need to build or integrate. Mainnet coming soon.</p>
+  <div class="network-grid">
+    <div class="network-card">
+      <div class="network-val">5042002</div>
+      <div class="network-label">Chain ID</div>
+    </div>
+    <div class="network-card">
+      <div class="network-val">&lt;1s</div>
+      <div class="network-label">Block finality</div>
+    </div>
+    <div class="network-card">
+      <div class="network-val">$0.0004</div>
+      <div class="network-label">Avg. gas cost</div>
+    </div>
+    <div class="network-card">
+      <div class="network-val">USDC</div>
+      <div class="network-label">Native gas token</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="background:var(--arc-surface); border:1px solid var(--arc-border); border-radius:14px; padding:20px 22px;">
+      <div style="font-size:12px; color:var(--arc-muted); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">RPC Endpoints</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <code style="font-family:var(--font-mono); font-size:13px; color:var(--arc-blue);">https://rpc.testnet.arc.network</code>
+        <code style="font-family:var(--font-mono); font-size:12px; color:var(--arc-muted);">wss://rpc.testnet.arc.network</code>
+        <code style="font-family:var(--font-mono); font-size:12px; color:var(--arc-muted);">https://rpc.blockdaemon.testnet.arc.network</code>
+        <code style="font-family:var(--font-mono); font-size:12px; color:var(--arc-muted);">https://rpc.drpc.testnet.arc.network</code>
+      </div>
+    </div>
+    <div style="background:var(--arc-surface); border:1px solid var(--arc-border); border-radius:14px; padding:20px 22px;">
+      <div style="font-size:12px; color:var(--arc-muted); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">Explorer &amp; Tools</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <a href="https://testnet.arcscan.app" target="_blank" style="color:var(--arc-blue); font-family:var(--font-mono); font-size:13px; text-decoration:none; display:flex; align-items:center; gap:6px;">
+          testnet.arcscan.app <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+        <a href="https://faucet.circle.com" target="_blank" style="color:var(--arc-blue); font-family:var(--font-mono); font-size:13px; text-decoration:none; display:flex; align-items:center; gap:6px;">
+          faucet.circle.com ↗
+        </a>
+        <a href="https://docs.arc.io" target="_blank" style="color:var(--arc-blue); font-family:var(--font-mono); font-size:13px; text-decoration:none; display:flex; align-items:center; gap:6px;">
+          docs.arc.io ↗
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTRACTS -->
+<div style="background: var(--arc-surface); border-top: 1px solid var(--arc-border); border-bottom: 1px solid var(--arc-border);">
+  <section class="section" id="contracts">
+    <div class="section-eyebrow">Contracts</div>
+    <h2 class="section-title">Deployed on Arc Testnet</h2>
+    <p class="section-sub">All addresses below are for Arc Testnet only. Interact directly via the block explorer.</p>
+    <div class="contracts-grid">
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">USDC <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Native gas token</span></div>
+          <div class="contract-addr">0x3600000000000000000000000000000000000000</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x3600000000000000000000000000000000000000', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">EURC <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Euro stablecoin</span></div>
+          <div class="contract-addr">0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">USYC <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Yield token</span></div>
+          <div class="contract-addr">0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">CCTP TokenMessengerV2 <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Domain 26</span></div>
+          <div class="contract-addr">0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">StableFX FxEscrow</div>
+          <div class="contract-addr">0x867650F5eAe8df91445971f14d89fd84F0C9a9f8</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x867650F5eAe8df91445971f14d89fd84F0C9a9f8', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">GatewayWallet <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Domain 26</span></div>
+          <div class="contract-addr">0x0077777d7EBA4688BDeF3E311b846F25870A19B9</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x0077777d7EBA4688BDeF3E311b846F25870A19B9', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">Permit2 <span style="font-size:11px; color:var(--arc-muted); font-family:var(--font-mono);">· Required for StableFX</span></div>
+          <div class="contract-addr">0x000000000022D473030F116dDEE9F6B43aC78BA3</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0x000000000022D473030F116dDEE9F6B43aC78BA3', this)">copy</button>
+      </div>
+      <div class="contract-item">
+        <div>
+          <div class="contract-name">Multicall3</div>
+          <div class="contract-addr">0xcA11bde05977b3631167028862bE2a173976CA11</div>
+        </div>
+        <button class="contract-copy" onclick="copyAddr('0xcA11bde05977b3631167028862bE2a173976CA11', this)">copy</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <div class="nav-logo-icon" style="width:26px;height:26px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    ARC DEX · Testnet
+  </div>
+  <div class="footer-links">
+    <a href="https://docs.arc.io" target="_blank">Documentation</a>
+    <a href="https://testnet.arcscan.app" target="_blank">Explorer</a>
+    <a href="https://faucet.circle.com" target="_blank">Faucet</a>
+    <a href="https://status.arc.io" target="_blank">Status</a>
+    <a href="https://discord.com/invite/buildonarc" target="_blank">Discord</a>
+    <a href="https://x.com/arc" target="_blank">Twitter</a>
+  </div>
+</footer>
+
+<script>
+const rates = { 'USDC→EURC': 0.9237, 'USDC→USYC': 0.9997, 'EURC→USDC': 1.0824, 'EURC→USYC': 1.0820, 'USYC→USDC': 1.0003, 'USYC→EURC': 0.9240 };
+let fromToken = 'USDC', toToken = 'EURC';
+const tokenData = {
+  USDC: { symbol: '$', cls: 'usdc', usd: 1.0 },
+  EURC: { symbol: '€', cls: 'eurc', usd: 1.0824 },
+  USYC: { symbol: 'Y', cls: 'usyc', usd: 0.9997 }
+};
+const tokenList = ['USDC','EURC','USYC'];
+
+function getRate() {
+  const key = `${fromToken}→${toToken}`;
+  return rates[key] || 1;
+}
+
+function calcSwap() {
+  const amt = parseFloat(document.getElementById('fromAmt').value) || 0;
+  const rate = getRate();
+  const out = amt * rate;
+  const fee = amt * 0.0004;
+  document.getElementById('toAmt').value = out > 0 ? out.toFixed(4) : '';
+  document.getElementById('rateDisplay').textContent = `1 ${fromToken} = ${rate.toFixed(4)} ${toToken}`;
+  document.getElementById('feeDisplay').textContent = `$${fee.toFixed(4)}`;
+  const fromUsd = amt * tokenData[fromToken].usd;
+  const toUsd = out * tokenData[toToken].usd;
+  document.getElementById('fromUsd').textContent = `≈ $${fromUsd.toFixed(2)}`;
+  document.getElementById('toUsd').textContent = `≈ $${toUsd.toFixed(2)}`;
+}
+
+function flipTokens() {
+  [fromToken, toToken] = [toToken, fromToken];
+  updateTokenUI();
+  calcSwap();
+}
+
+let fromIdx = 0, toIdx = 1;
+function toggleToken() {
+  fromIdx = (fromIdx + 1) % tokenList.length;
+  if (tokenList[fromIdx] === toToken) fromIdx = (fromIdx + 1) % tokenList.length;
+  fromToken = tokenList[fromIdx];
+  updateTokenUI(); calcSwap();
+}
+function toggleToToken() {
+  toIdx = (toIdx + 1) % tokenList.length;
+  if (tokenList[toIdx] === fromToken) toIdx = (toIdx + 1) % tokenList.length;
+  toToken = tokenList[toIdx];
+  updateTokenUI(); calcSwap();
+}
+
+function updateTokenUI() {
+  const fd = tokenData[fromToken], td = tokenData[toToken];
+  document.getElementById('fromIcon').textContent = fd.symbol;
+  document.getElementById('fromIcon').className = `token-icon ${fd.cls}`;
+  document.getElementById('fromName').textContent = fromToken;
+  document.getElementById('toIcon').textContent = td.symbol;
+  document.getElementById('toIcon').className = `token-icon ${td.cls}`;
+  document.getElementById('toName').textContent = toToken;
+  document.getElementById('rateDisplay').textContent = `1 ${fromToken} = ${getRate().toFixed(4)} ${toToken}`;
+}
+
+function handleSwap() {
+  alert('Connect your wallet to execute swaps on Arc Testnet.\n\nRPC: https://rpc.testnet.arc.network\nChain ID: 5042002');
+}
+
+function copyAddr(addr, btn) {
+  navigator.clipboard.writeText(addr).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'copied!';
+    btn.style.color = '#5DCAA5';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+  });
+}
+</script>
+</body>
+</html>
